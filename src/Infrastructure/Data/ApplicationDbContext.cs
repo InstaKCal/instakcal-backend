@@ -13,8 +13,13 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>, IApplica
 
     public DbSet<TodoList> TodoLists => Set<TodoList>();
 
-    public DbSet<TodoItem> TodoItems => Set<TodoItem>();
+    public DbSet<TodoItem> TodoItems => Set<TodoItem>(); 
+    
+    public DbSet<Images> Images => Set<Images>();
+    
+    public DbSet<FoodData> FoodData => Set<FoodData>();
 
+    
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);

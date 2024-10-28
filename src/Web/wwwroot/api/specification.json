@@ -780,7 +780,11 @@
             "type": "integer",
             "format": "int32"
           },
-          "url": {
+          "originalUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "modifiedUrl": {
             "type": "string",
             "nullable": true
           }

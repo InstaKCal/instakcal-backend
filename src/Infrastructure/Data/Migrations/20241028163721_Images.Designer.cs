@@ -4,6 +4,7 @@ using InstaKcalWebApi.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace InstaKcalWebApi.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241028163721_Images")]
+    partial class Images
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,104 +24,6 @@ namespace InstaKcalWebApi.Infrastructure.Data.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("InstaKcalWebApi.Domain.Entities.FoodData", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int?>("Calories")
-                        .HasColumnType("int");
-
-                    b.Property<float?>("Carbohydrates")
-                        .HasColumnType("real");
-
-                    b.Property<double?>("Cholesterol")
-                        .HasColumnType("float");
-
-                    b.Property<DateTimeOffset>("Created")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<float?>("Fats")
-                        .HasColumnType("real");
-
-                    b.Property<float?>("Fiber")
-                        .HasColumnType("real");
-
-                    b.Property<string>("ImageId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTimeOffset>("LastModified")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("LastModifiedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<float?>("Proteins")
-                        .HasColumnType("real");
-
-                    b.Property<float?>("SaturateFats")
-                        .HasColumnType("real");
-
-                    b.Property<float?>("Sodium")
-                        .HasColumnType("real");
-
-                    b.Property<float?>("Sugars")
-                        .HasColumnType("real");
-
-                    b.Property<float?>("TransFats")
-                        .HasColumnType("real");
-
-                    b.Property<float?>("UnsaturateFats")
-                        .HasColumnType("real");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("FoodData");
-                });
-
-            modelBuilder.Entity("InstaKcalWebApi.Domain.Entities.Images", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTimeOffset>("Created")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTimeOffset>("LastModified")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("LastModifiedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("OriginalUrl")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ProcessedUrl")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Images");
-                });
 
             modelBuilder.Entity("InstaKcalWebApi.Domain.Entities.TodoItem", b =>
                 {

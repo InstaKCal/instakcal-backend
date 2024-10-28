@@ -1,4 +1,5 @@
 ﻿using System.Runtime.InteropServices;
+using InstaKcalWebApi.Application.Image.Queries.GetImages;
 using InstaKcalWebApi.Domain.Constants;
 using InstaKcalWebApi.Domain.Entities;
 using InstaKcalWebApi.Infrastructure.Identity;
@@ -101,6 +102,35 @@ public class ApplicationDbContextInitialiser
                     new TodoItem { Title = "Realise you've already done two things on the list! 🤯"},
                     new TodoItem { Title = "Reward yourself with a nice, long nap 🏆" },
                 }
+            });
+
+            await _context.SaveChangesAsync();
+        }
+        
+        if (!_context.Images.Any())
+        {
+            _context.Images.Add(new Images { UserId = "1",OriginalUrl = "originalUrl", ProcessedUrl = "processedUrl"});
+
+            await _context.SaveChangesAsync();
+        }
+        
+        if (!_context.FoodData.Any())
+        {
+            _context.FoodData.Add(new FoodData {  
+                Name = "Cheeseburger",
+                ImageId = "img123",
+                Calories = 300,
+                Proteins = 15.5f,
+                Carbohydrates = 30.0f,
+                Sugars = 5.0f,
+                Fiber = 3.0f,
+                Fats = 18.0f,
+                SaturateFats = 6.0f,
+                TransFats = 0.5f,
+                UnsaturateFats = 11.5f,
+                Sodium = 450.0f,
+                Cholesterol = 40.0
+                
             });
 
             await _context.SaveChangesAsync();

@@ -6,5 +6,7 @@ public class Image
 
     public int Id { get; init; }
     
-    public string? Url { get; init; }
+    public string? originalUrl { get; init; }
+    
+    public string? modifiedUrl { get; init; }
 }

@@ -17,7 +17,8 @@ public class GetImagesQueryHandler : IRequestHandler<GetImagesQuery, IEnumerable
         {
             Date = DateTime.Now.AddDays(index), 
             Id = rng.Next(-20, 55),
-            Url = "url"
+            originalUrl = "original url",
+            modifiedUrl = "modifiedUrl",
         });
     }
 }

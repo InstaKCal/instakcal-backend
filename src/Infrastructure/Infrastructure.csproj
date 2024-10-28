@@ -24,4 +24,9 @@
     <ProjectReference Include="..\Application\Application.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Remove="Data\Migrations\20241028163721_Images.cs" />
+    <Compile Remove="Data\Migrations\20241028163721_Images.Designer.cs" />
+  </ItemGroup>
+
 </Project>
