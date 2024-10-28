@@ -38,8 +38,8 @@ Content-Type: application/json
 
 ###
 
-# GET WeatherForecast
-GET {{Web_HostAddress}}/api/WeatherForecasts
+# GET Images
+GET {{Web_HostAddress}}/api/Images
 Authorization: Bearer {{BearerToken}}
 
 ###
