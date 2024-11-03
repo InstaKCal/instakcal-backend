@@ -48,7 +48,8 @@ builder.Services.AddSwaggerGen(c =>
 
 });
 
-var key = Encoding.ASCII.GetBytes("1234234235342656241414141");
+var key = Encoding.ASCII.GetBytes(builder.Configuration["JwtSettings:SecretKey"]);
+
 
 builder.Services.AddAuthentication(x =>
 {
