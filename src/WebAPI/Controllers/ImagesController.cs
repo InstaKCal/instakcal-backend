@@ -1,9 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-using instakcal_backend.Application.DTOs.User;
-using instakcal_backend.Application.Enums;
 using instakcal_backend.Application.Interfaces;
-using instakcal_backend.Application.Responses;
 using Microsoft.AspNetCore.Authorization;
+using instakcal_backend.Application.DTOs.Image;
 
 namespace instakcal_backend.WebAPI.Controllers;
 
@@ -13,30 +11,38 @@ public class ImagesController : ControllerBase
 {
 
     private readonly ILogger<ImagesController> _logger;
-    private readonly IUserService _userService;
+    private readonly IImageService _imageService;
 
 
-    public ImagesController( ILogger<ImagesController> logger, IUserService userService)
+    public ImagesController( ILogger<ImagesController> logger, IImageService imageService)
     {
         _logger = logger;
-        _userService = userService;
+        _imageService = imageService;
 
     }
     
     [Authorize]
     [HttpPost("create_image")]
-    public async Task<IActionResult> CreateImage()
+    public async Task<IActionResult> CreateImage([FromForm] SaveImageDto saveImageDto)
     {
-        return Ok();
+        await _imageService.SaveImageAsync(saveImageDto);
+        return Created();
     }
     
     [Authorize]
-    [HttpGet("get_images")]
-    public async Task<IActionResult> GetImages()
+    [HttpGet("user/{userId}")]
+    public async Task<IActionResult> GetImagesByUserId(string userId)
     {
-        return Ok();
+        try
+        {
+            var images = await _imageService.GetImagesByUserIdAsync(userId);
+            return Ok(images);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { Error = "An unexpected error occurred.", Details = ex.Message });
+        }
     }
-    
     [Authorize]
     [HttpDelete("delete_image")]
     public async Task<IActionResult> DeleteImages()

@@ -1,106 +1,83 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
-using Microsoft.IdentityModel.Tokens;
-using instakcal_backend.Application.DTOs.User;
-using instakcal_backend.Application.Enums;
+﻿using System.Net;
+using System.Net.Sockets;
 using instakcal_backend.Application.Interfaces;
-using instakcal_backend.Application.Responses;
 using instakcal_backend.Domain.Entities;
 using instakcal_backend.Domain.Repositories;
+using instakcal_backend.Application.DTOs.Image;
+
 namespace instakcal_backend.Application.Services
 {
-    public class UserService : IUserService
+    public class ImageService : IImageService
     {
-        private readonly IUserRepository _userRepository;
-        
-        private readonly IConfiguration _configuration;
+        private readonly IImageRepository _imageRepository;
+        private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
 
-        public UserService(IUserRepository userRepository,  IConfiguration configuration)
+        public ImageService(IImageRepository imageRepository, IWebHostEnvironment webHostEnvironment, IHttpContextAccessor httpContextAccessor)
         {
-            _userRepository = userRepository;
-            _configuration = configuration;
-
+            _imageRepository = imageRepository;
+            _webHostEnvironment = webHostEnvironment;
+            _httpContextAccessor = httpContextAccessor;
         }
 
-        public async Task<UserRegistrationResponse> RegisterUserAsync(UserRegistrationDto userRegistrationDtoDto)
+        public async Task SaveImageAsync(SaveImageDto saveImageDto)
         {
-            try
-            {
-                if (await _userRepository.GetByEmailAsync(userRegistrationDtoDto.Email) != null)
-                {
-                    return new UserRegistrationResponse(code: UserRegistrationResponseStatus.USER_ALREADY_REGISTERED);
-                }
-                var hashedPassword = HashPassword(userRegistrationDtoDto.Password); 
-                var user = new User
-                {
-                    Username = userRegistrationDtoDto.Username,
-                    Email = userRegistrationDtoDto.Email,
-                    PasswordHash = hashedPassword,
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow,
-                    FirstName = userRegistrationDtoDto.FirstName,
-                    LastName = userRegistrationDtoDto.LastName,
-                    DateOfBirth = userRegistrationDtoDto.DateOfBirth,
-                    IsActive = true
-                };
+            if (saveImageDto.OriginalImage == null || saveImageDto.ProcessedImage == null || saveImageDto.UserId == null)
+                throw new ArgumentException("Both original and processed images are required.");
 
-                await _userRepository.AddUserAsync(user);
-
-                return new UserRegistrationResponse(code: UserRegistrationResponseStatus.USER_REGISTER_SUCCESS);
-            }
-            catch (Exception ex)
+            var userFolderPath = Path.Combine(_webHostEnvironment.WebRootPath, "images", saveImageDto.UserId);
+            var originalPath = Path.Combine(userFolderPath, "original");
+            var processedPath = Path.Combine(userFolderPath, "processed");
+            
+            Directory.CreateDirectory(originalPath);
+            Directory.CreateDirectory(processedPath);
+            
+            var originalFileName = $"{Guid.NewGuid()}_{saveImageDto.OriginalImage.FileName}";
+            var originalFilePath = Path.Combine(originalPath, originalFileName);
+            await using (var originalStream = new FileStream(originalFilePath, FileMode.Create))
             {
-                Console.WriteLine(ex);
-                return new UserRegistrationResponse(UserRegistrationResponseStatus.USER_REGISTER_ERROR);
+                await saveImageDto.OriginalImage.CopyToAsync(originalStream);
             }
-        }
-        
-        public async Task<UserLoginResponse> LoginUserAsync(UserLoginDto loginDto)
-        {
-            var user = await _userRepository.GetByUsernameOrEmailAsync(loginDto.UsernameOrEmail);
-            if (user == null || !VerifyPassword(loginDto.Password, user.PasswordHash))
+            
+            var processedFileName = $"{Guid.NewGuid()}_{saveImageDto.ProcessedImage.FileName}";
+            var processedFilePath = Path.Combine(processedPath, processedFileName);
+            await using (var processedStream = new FileStream(processedFilePath, FileMode.Create))
             {
-                return new UserLoginResponse(UserLoginResponseStatus.USER_INVALID_CREDENTIALS, token:null);
+                await saveImageDto.ProcessedImage.CopyToAsync(processedStream);
             }
 
-            var token = GenerateJwtToken(user.Id);
+            string originalUrl = $"/images/{saveImageDto.UserId}/original/{originalFileName}";
+            string processedUrl = $"/images/{saveImageDto.UserId}/processed/{processedFileName}";
 
-            return new UserLoginResponse(UserLoginResponseStatus.USER_LOGIN_SUCCESS, token);
-        }
-        
-        private string GenerateJwtToken(Guid userId)
-        {
-            var jwtSettings = _configuration.GetSection("JwtSettings");
-
-            var claims = new[]
+            var image = new Image
             {
-                new Claim("userId", userId.ToString()),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+                UserId = saveImageDto.UserId,
+                OriginalUrl = originalUrl,
+                ProcessedUrl = processedUrl,
+                CreatedAt = DateTime.UtcNow
             };
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["SecretKey"]));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-            var token = new JwtSecurityToken(
-                issuer: jwtSettings["Issuer"],
-                audience: jwtSettings["Audience"],
-                claims: claims,
-                expires: DateTime.Now.AddHours(1),
-                signingCredentials: creds);
-
-            return new JwtSecurityTokenHandler().WriteToken(token);
-        }
-
-        private bool VerifyPassword(string password, string storedHash)
-        {
-            return BCrypt.Net.BCrypt.Verify(password, storedHash);
+            await _imageRepository.AddImageAsync(image);
         }
         
-        private string HashPassword(string password)
+        public async Task<IEnumerable<ImageResponseDto>> GetImagesByUserIdAsync(string userId)
         {
-            return BCrypt.Net.BCrypt.HashPassword(password);
+            var images = await _imageRepository.GetImagesByUserIdAsync(userId);
+            
+            var request = _httpContextAccessor.HttpContext.Request;
+            var port = request.Host.Port;
+
+            var hostName = Dns.GetHostName();
+            var ipAddress = Dns.GetHostAddresses(hostName)
+                .FirstOrDefault(ip => ip.AddressFamily == AddressFamily.InterNetwork);
+            var baseUrl = $"{request.Scheme}://{ipAddress}:{port}";
+
+            return images.Select(img => new ImageResponseDto
+            {
+                OriginalUrl = $"{baseUrl}{img.OriginalUrl}",
+                ProcessedUrl = $"{baseUrl}{img.ProcessedUrl}"
+            });
         }
     }
 }

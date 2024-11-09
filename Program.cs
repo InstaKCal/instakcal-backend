@@ -7,7 +7,7 @@ using instakcal_backend.Application.Interfaces;
 using instakcal_backend.Application.Services;
 using instakcal_backend.Domain.Repositories;
 using instakcal_backend.Infrastructure;
-using instakcal_backend.Infrastructure.Persistence;
+using instakcal_backend.Infrastructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -73,9 +73,23 @@ builder.Services.AddDbContext<DatabaseContext>(options =>
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IImageService, ImageService>();
+builder.Services.AddScoped<IImageRepository, ImageRepository>();
 
 builder.Services.AddControllers();
 builder.Services.AddLogging();
+builder.Services.AddHttpContextAccessor();
+
+
+
+builder.WebHost.ConfigureKestrel(serverOptions =>
+{
+    serverOptions.ListenAnyIP(7071); 
+    serverOptions.ListenAnyIP(7072, listenOptions =>
+    { 
+        listenOptions.UseHttps(); 
+    });
+});
 
 var app = builder.Build();
 
@@ -92,6 +106,8 @@ if (app.Environment.IsDevelopment())
     
 }
 app.UseHttpsRedirection();
+
+app.UseStaticFiles();
 
 app.UseAuthorization();
 

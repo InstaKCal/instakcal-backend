@@ -10,10 +10,13 @@ namespace instakcal_backend.Domain.Entities
         public Guid Id { get; set; } = Guid.NewGuid();
         
         [Required]
-        public string originalUrl { get; set; }
+        public string UserId { get; set; }
+        
+        [Required]
+        public string OriginalUrl { get; set; }
 
         [Required]
-        public string processedUrl { get; set; }
+        public string ProcessedUrl { get; set; }
         
     }
 }

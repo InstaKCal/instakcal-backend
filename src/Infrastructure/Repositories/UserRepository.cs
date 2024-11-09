@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using instakcal_backend.Domain.Entities;
 using instakcal_backend.Domain.Repositories;
 
-namespace instakcal_backend.Infrastructure.Persistence
+namespace instakcal_backend.Infrastructure.Repositories
 {
     public class UserRepository : IUserRepository
     {
